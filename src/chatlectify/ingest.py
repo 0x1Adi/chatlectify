@@ -48,7 +48,7 @@ def _claude(data) -> list[Message]:
             if not text and "content" in m:
                 text = "".join(p.get("text", "") for p in (m.get("content") or []) if isinstance(p, dict))
             if not text:
-                raise ValueError("empty claude message")
+                continue
             out.append(Message(
                 msg_id=m.get("uuid", f"{cid}-{len(out)}"), conv_id=cid,
                 timestamp=_ts(m.get("created_at")), role="human",

@@ -23,7 +23,8 @@ chatlectify ingest   export.json --out normalized.json
 chatlectify features normalized.json --out features.json
 chatlectify build    export.json --out-dir ./skill/
 chatlectify benchmark --skill ./skill/SKILL.md --user-samples normalized.json
-chatlectify all      export.json --out-dir ./skill/
+chatlectify all      export.json --out-dir ./skill/            # synth only
+chatlectify all      export.json --out-dir ./skill/ --benchmark # + fidelity test
 ```
 
 `--format` auto-detects Claude, ChatGPT, or Gemini exports. Use `--provider openai` to use GPT.

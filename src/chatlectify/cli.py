@@ -108,13 +108,13 @@ def all_cmd(input: Path = typer.Argument(..., exists=True),
             out_dir: Path = typer.Option(..., "--out-dir"),
             provider: str = typer.Option("anthropic", "--provider"),
             model: str = typer.Option("", "--model"),
-            skip_benchmark: bool = typer.Option(False, "--skip-benchmark"),
+            benchmark: bool = typer.Option(False, "--benchmark", help="run fidelity benchmark (2N LLM calls)"),
             force: bool = typer.Option(False, "--force"),
             n: int = typer.Option(100, "--n", help="benchmark sample size")):
     from .emit import write_outputs
     _key(provider)
     skill_md, feats, report, kept, pastes, stats, bench = _pipeline(
-        input, provider, model, force, not skip_benchmark, n=n)
+        input, provider, model, force, benchmark, n=n)
     write_outputs(out_dir, skill_md, feats, report, kept, pastes, stats, benchmark=bench)
     typer.echo(f"done -> {out_dir}")
 

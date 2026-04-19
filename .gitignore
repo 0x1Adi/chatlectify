@@ -2,7 +2,14 @@
 __pycache__/
 *.egg-info/
 .pytest_cache/
+.ruff_cache/
 .claude/
+.coverage
+coverage.xml
+htmlcov/
+build/
+dist/
+.DS_Store
 
 # user-generated outputs (don't commit your personal chat data or skills)
 out/

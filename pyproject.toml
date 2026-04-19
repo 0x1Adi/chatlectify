@@ -6,9 +6,35 @@ build-backend = "setuptools.build_meta"
 name = "chatlectify"
 version = "0.1.0"
 description = "Compile your AI chat history into a writing-style skill."
-license = {text = "MIT"}
+license = { text = "MIT" }
 requires-python = ">=3.11"
 readme = "README.md"
+authors = [{ name = "Aditya Tiwari" }]
+maintainers = [{ name = "Aditya Tiwari" }]
+keywords = [
+    "llm",
+    "writing-style",
+    "claude",
+    "chatgpt",
+    "gemini",
+    "skill",
+    "prompt-engineering",
+    "personalization",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Utilities",
+]
 dependencies = [
     "typer>=0.12",
     "pydantic>=2.6",
@@ -21,14 +47,21 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff>=0.5"]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.5",
+    "pip-audit>=2.7",
+    "build>=1.2",
+]
 
 [project.scripts]
 chatlectify = "chatlectify.cli:app"
 
 [project.urls]
-Homepage = "https://chatlectify.dev"
-Repository = "https://github.com/chatlectify/chatlectify"
+Repository = "https://github.com/0x1Adi/chatlectify"
+Issues = "https://github.com/0x1Adi/chatlectify/issues"
+Changelog = "https://github.com/0x1Adi/chatlectify/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -43,3 +76,19 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
 ignore = ["E501"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.coverage.run]
+source = ["chatlectify"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

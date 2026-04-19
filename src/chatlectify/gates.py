@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 from .schemas import GateReport, Message, StyleFeatures
 

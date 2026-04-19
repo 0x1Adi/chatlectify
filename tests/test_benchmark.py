@@ -1,6 +1,6 @@
 import random
 
-from chatlectify.benchmark import _cos_dist, _split_train_test, ngram_auc, run_benchmark
+from chatlectify.benchmark import _cos, _split, ngram_auc, run_benchmark
 from chatlectify.schemas import Message
 
 
@@ -18,7 +18,7 @@ def _msgs(n=200):
 
 
 def test_split():
-    train, test = _split_train_test(_msgs(200))
+    train, test = _split(_msgs(200))
     assert len(train) > 0 and len(test) > 0
     assert abs(len(train) / 200 - 0.8) < 0.1
 
@@ -35,8 +35,8 @@ def test_ngram_auc():
 
 def test_cos_dist():
     import numpy as np
-    assert _cos_dist(np.array([1.0, 0.0]), np.array([1.0, 0.0])) < 1e-6
-    assert _cos_dist(np.array([1.0, 0.0]), np.array([0.0, 1.0])) > 0.9
+    assert _cos(np.array([1.0, 0.0]), np.array([1.0, 0.0])) < 1e-6
+    assert _cos(np.array([1.0, 0.0]), np.array([0.0, 1.0])) > 0.9
 
 
 def test_benchmark_mocked():

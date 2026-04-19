@@ -204,6 +204,36 @@ def test_cli_all_no_benchmark(tmp_path, monkeypatch):
     assert not (out_dir / "benchmark_report.json").exists()
 
 
+def test_cli_all_bench_model_passed_through(tmp_path, monkeypatch):
+    """--bench-model should override --model for the benchmark call only."""
+    seen = {"synth": None, "bench": []}
+
+    def fake_call(provider, prompt, system=None, model=None, max_tokens=4000):
+        if system is None:
+            seen["synth"] = model
+            return VALID_SKILL_MD
+        seen["bench"].append(model)
+        return "short reply"
+
+    monkeypatch.setattr("chatlectify.llm.call", fake_call)
+    monkeypatch.setattr("chatlectify.llm.available", lambda p: "api")
+
+    runner = CliRunner()
+    corpus = _make_corpus(tmp_path / "corpus.md", n=260)
+    out_dir = tmp_path / "skill"
+    result = runner.invoke(
+        app,
+        ["all", str(corpus), "--out-dir", str(out_dir),
+         "--model", "claude-sonnet-4-6",
+         "--bench-model", "claude-haiku-4-5",
+         "--benchmark", "--n", "30"],
+    )
+    assert result.exit_code == 0, result.stdout
+    assert seen["synth"] == "claude-sonnet-4-6"
+    assert seen["bench"], "benchmark was never called"
+    assert all(m == "claude-haiku-4-5" for m in seen["bench"])
+
+
 def test_cli_all_with_benchmark(tmp_path, monkeypatch):
     _stub_llm(monkeypatch)
     runner = CliRunner()

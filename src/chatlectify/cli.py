@@ -54,7 +54,8 @@ def features(input: Path = typer.Argument(..., exists=True),
     typer.echo(f"features -> {out} (kept={stats['kept']})")
 
 
-def _pipeline(input: Path, provider: str, model: str, force: bool, do_bench: bool, n: int = 100):
+def _pipeline(input: Path, provider: str, model: str, force: bool, do_bench: bool,
+              n: int = 100, bench_model: str = ""):
     from .benchmark import run_benchmark
     from .clean import clean
     from .features import extract
@@ -71,7 +72,10 @@ def _pipeline(input: Path, provider: str, model: str, force: bool, do_bench: boo
     bench = None
     if do_bench:
         try:
-            bench = run_benchmark(skill_md, kept, provider=provider, model=model or None, n=n)
+            bench = run_benchmark(
+                skill_md, kept, provider=provider,
+                model=(bench_model or model) or None, n=n,
+            )
         except Exception as e:
             typer.echo(f"benchmark skipped: {e}", err=True)
     return skill_md, feats, report, kept, pastes, stats, bench
@@ -94,12 +98,14 @@ def build(input: Path = typer.Argument(..., exists=True),
 def benchmark(skill: Path = typer.Option(..., "--skill", exists=True),
               user_samples: Path = typer.Option(..., "--user-samples", exists=True),
               provider: str = typer.Option("anthropic", "--provider"),
+              model: str = typer.Option("", "--model"),
               n: int = typer.Option(100, "--n")):
     from .benchmark import run_benchmark
     from .schemas import Message
     _key(provider)
     msgs = [Message(**m) for m in json.loads(user_samples.read_text())]
-    report = run_benchmark(skill.read_text(), msgs, provider=provider, n=n)
+    report = run_benchmark(skill.read_text(), msgs, provider=provider,
+                           model=model or None, n=n)
     typer.echo(report.model_dump_json(indent=2))
 
 
@@ -107,14 +113,16 @@ def benchmark(skill: Path = typer.Option(..., "--skill", exists=True),
 def all_cmd(input: Path = typer.Argument(..., exists=True),
             out_dir: Path = typer.Option(..., "--out-dir"),
             provider: str = typer.Option("anthropic", "--provider"),
-            model: str = typer.Option("", "--model"),
+            model: str = typer.Option("", "--model", help="model for synth (and benchmark if --bench-model unset)"),
+            bench_model: str = typer.Option("", "--bench-model",
+                                            help="separate (cheaper) model for benchmark only; falls back to --model"),
             benchmark: bool = typer.Option(False, "--benchmark", help="run fidelity benchmark (2N LLM calls)"),
             force: bool = typer.Option(False, "--force"),
             n: int = typer.Option(100, "--n", help="benchmark sample size")):
     from .emit import write_outputs
     _key(provider)
     skill_md, feats, report, kept, pastes, stats, bench = _pipeline(
-        input, provider, model, force, benchmark, n=n)
+        input, provider, model, force, benchmark, n=n, bench_model=bench_model)
     write_outputs(out_dir, skill_md, feats, report, kept, pastes, stats, benchmark=bench)
     typer.echo(f"done -> {out_dir}")
 

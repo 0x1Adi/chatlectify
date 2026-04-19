@@ -109,7 +109,8 @@ Common options:
 
 - `--out-dir PATH` — where to write artifacts.
 - `--provider {anthropic,openai}` — default `anthropic`.
-- `--model MODEL` — override the default model.
+- `--model MODEL` — override the default model (applies to synth + benchmark).
+- `--bench-model MODEL` — use a separate (cheaper) model for the benchmark only. Falls back to `--model`.
 - `--benchmark` — opt in to fidelity measurement (makes `2N` extra LLM calls).
 - `--n N` — benchmark sample size (default 100).
 - `--force` — bypass quality gates (use at your own risk).

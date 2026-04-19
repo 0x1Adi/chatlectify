@@ -86,7 +86,8 @@ def run_benchmark(skill_body: str, msgs: list[Message], provider="anthropic",
         b, s = call(BASELINE, p), call(skill_body, p)
         if not b or not s:
             raise RuntimeError("empty LLM response")
-        base_out.append(b); skill_out.append(s)
+        base_out.append(b)
+        skill_out.append(s)
     user_texts = [m.text for m in test[: len(base_out)]]
     auc_b, auc_s = ngram_auc(user_texts, base_out), ngram_auc(user_texts, skill_out)
     assert 0.0 <= auc_b <= 1.0 and 0.0 <= auc_s <= 1.0

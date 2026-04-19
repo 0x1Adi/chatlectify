@@ -70,8 +70,10 @@ def run_benchmark(skill_body: str, msgs: list[Message], provider="anthropic",
         raise RuntimeError(f"too few test samples: {len(test)}")
     prompts = [(_SENT.split(m.text, maxsplit=1)[0].strip() or m.text[:80]) for m in test[:n]]
     call = llm_fn or (lambda s, u: _call(s, u, provider, model))
+    import sys
     base_out, skill_out = [], []
-    for p in prompts:
+    for i, p in enumerate(prompts, 1):
+        print(f"  benchmark {i}/{len(prompts)}", file=sys.stderr, flush=True)
         b, s = call(BASELINE, p), call(skill_body, p)
         if not b or not s:
             raise RuntimeError("empty LLM response")

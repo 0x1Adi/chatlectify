@@ -54,7 +54,7 @@ def features(input: Path = typer.Argument(..., exists=True),
     typer.echo(f"features -> {out} (kept={stats['kept']})")
 
 
-def _pipeline(input: Path, provider: str, model: str, force: bool, do_bench: bool):
+def _pipeline(input: Path, provider: str, model: str, force: bool, do_bench: bool, n: int = 100):
     from .benchmark import run_benchmark
     from .clean import clean
     from .features import extract
@@ -71,7 +71,7 @@ def _pipeline(input: Path, provider: str, model: str, force: bool, do_bench: boo
     bench = None
     if do_bench:
         try:
-            bench = run_benchmark(skill_md, kept, provider=provider, model=model or None)
+            bench = run_benchmark(skill_md, kept, provider=provider, model=model or None, n=n)
         except Exception as e:
             typer.echo(f"benchmark skipped: {e}", err=True)
     return skill_md, feats, report, kept, pastes, stats, bench
@@ -109,11 +109,12 @@ def all_cmd(input: Path = typer.Argument(..., exists=True),
             provider: str = typer.Option("anthropic", "--provider"),
             model: str = typer.Option("", "--model"),
             skip_benchmark: bool = typer.Option(False, "--skip-benchmark"),
-            force: bool = typer.Option(False, "--force")):
+            force: bool = typer.Option(False, "--force"),
+            n: int = typer.Option(100, "--n", help="benchmark sample size")):
     from .emit import write_outputs
     _key(provider)
     skill_md, feats, report, kept, pastes, stats, bench = _pipeline(
-        input, provider, model, force, not skip_benchmark)
+        input, provider, model, force, not skip_benchmark, n=n)
     write_outputs(out_dir, skill_md, feats, report, kept, pastes, stats, benchmark=bench)
     typer.echo(f"done -> {out_dir}")
 

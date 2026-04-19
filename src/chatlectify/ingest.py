@@ -78,6 +78,34 @@ def _chatgpt(data) -> list[Message]:
     return out
 
 
+_TEXT_EXTS = {".txt", ".md", ".markdown", ".rst"}
+
+
+def _text_file_msgs(fp: Path, cid: str, start: int) -> list[Message]:
+    """Split one text file into messages on blank-line paragraphs."""
+    raw = fp.read_text(encoding="utf-8", errors="ignore")
+    paras = [p.strip() for p in re.split(r"\n\s*\n", raw) if p.strip()]
+    out: list[Message] = []
+    for i, p in enumerate(paras):
+        out.append(Message(msg_id=f"{cid}-{start+i}", conv_id=cid, role="human",
+                           text=p, word_count=_wc(p)))
+    return out
+
+
+def _text(path: Path) -> list[Message]:
+    """Ingest a plaintext file or a folder of them. Each paragraph = one message."""
+    out: list[Message] = []
+    if path.is_dir():
+        files = sorted(f for f in path.rglob("*") if f.is_file() and f.suffix.lower() in _TEXT_EXTS)
+        if not files:
+            raise ValueError(f"no text files (.txt/.md/.markdown/.rst) in {path}")
+        for fp in files:
+            out.extend(_text_file_msgs(fp, cid=fp.stem, start=len(out)))
+    else:
+        out = _text_file_msgs(path, cid=path.stem, start=0)
+    return out
+
+
 def _gemini(path: Path) -> list[Message]:
     text = re.sub(r"<[^>]+>", "\n", path.read_text(encoding="utf-8", errors="ignore"))
     out: list[Message] = []
@@ -93,15 +121,24 @@ def _gemini(path: Path) -> list[Message]:
 
 def ingest(path: str | Path, fmt: str = "auto") -> list[Message]:
     path = Path(path)
-    data = json.loads(path.read_text(encoding="utf-8")) if path.suffix.lower() == ".json" else None
     if fmt == "auto":
-        fmt = "gemini" if path.suffix.lower() in (".html", ".htm") else _detect(path, data)
-    if fmt == "claude":
-        msgs = _claude(data)
-    elif fmt == "chatgpt":
-        msgs = _chatgpt(data)
+        if path.is_dir():
+            fmt = "text"
+        elif path.suffix.lower() in (".html", ".htm"):
+            fmt = "gemini"
+        elif path.suffix.lower() in _TEXT_EXTS:
+            fmt = "text"
+        elif path.suffix.lower() == ".json":
+            fmt = _detect(path, json.loads(path.read_text(encoding="utf-8")))
+        else:
+            raise ValueError(f"cannot detect format for {path}")
+    if fmt in ("claude", "chatgpt"):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        msgs = _claude(data) if fmt == "claude" else _chatgpt(data)
     elif fmt == "gemini":
         msgs = _gemini(path)
+    elif fmt == "text":
+        msgs = _text(path)
     else:
         raise ValueError(f"unknown format: {fmt}")
     if not msgs:

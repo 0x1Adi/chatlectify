@@ -28,6 +28,24 @@ def test_empty_raises(tmp_path):
         ingest(p)
 
 
+def test_text_file(tmp_path):
+    p = tmp_path / "essay.md"
+    p.write_text("First paragraph here.\n\nSecond paragraph here.\n\nThird one.\n")
+    msgs = ingest(p)
+    assert len(msgs) == 3
+    assert msgs[1].text == "Second paragraph here."
+
+
+def test_text_folder(tmp_path):
+    (tmp_path / "a.md").write_text("Post one, para one.\n\nPost one, para two.")
+    (tmp_path / "b.txt").write_text("Post two.")
+    sub = tmp_path / "nested"
+    sub.mkdir()
+    (sub / "c.md").write_text("Nested post.")
+    msgs = ingest(tmp_path)
+    assert len(msgs) == 4
+
+
 def test_unknown_format(tmp_path):
     p = tmp_path / "x.json"
     p.write_text('{"foo": "bar"}')

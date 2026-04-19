@@ -27,7 +27,19 @@ chatlectify all      export.json --out-dir ./skill/            # synth only
 chatlectify all      export.json --out-dir ./skill/ --benchmark # + fidelity test
 ```
 
-`--format` auto-detects Claude, ChatGPT, or Gemini exports. Use `--provider openai` to use GPT.
+`--format` auto-detects Claude, ChatGPT, Gemini exports, or plaintext (`.txt`/`.md`/`.rst` files and folders). Use `--provider openai` to use GPT.
+
+### Train on your own writing (not just chat)
+
+Chat exports capture how you *chat*. For a skill that matches how you *write* (blogs, essays, emails, MRs, Slack threads), point the ingester at a folder:
+
+```bash
+mkdir writing-corpus
+# drop in .md/.txt/.rst files — blog posts, essays, slack threads, emails, MRs
+chatlectify all ./writing-corpus/ --out-dir ./skill/
+```
+
+Each file is split into paragraph-sized "messages" (blank-line separated). A folder of 20+ blog posts usually hits the 200-msg gate comfortably. Mix sources (blog + slack + email) to cover multiple registers — or train separate skills per register.
 
 ## Outputs (`--out-dir`)
 

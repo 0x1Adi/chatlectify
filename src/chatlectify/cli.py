@@ -1,6 +1,5 @@
 
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -10,10 +9,14 @@ app = typer.Typer(add_completion=False, help="Compile AI chat history into a wri
 
 
 def _key(provider: str) -> None:
-    env = "ANTHROPIC_API_KEY" if provider == "anthropic" else "OPENAI_API_KEY"
-    if not os.environ.get(env):
-        typer.echo(f"error: missing {env}", err=True)
+    from .llm import available
+    mode = available(provider)
+    if mode is None:
+        hint = ("ANTHROPIC_API_KEY or `claude` CLI" if provider == "anthropic"
+                else "OPENAI_API_KEY or `codex` CLI")
+        typer.echo(f"error: no auth for {provider}; need {hint}", err=True)
         raise typer.Exit(2)
+    typer.echo(f"[{provider}] using {mode}", err=True)
 
 
 def _load_msgs(path: Path):

@@ -105,21 +105,8 @@ def _fallback(f: StyleFeatures, exemplars: list[Message]) -> str:
 
 
 def _call_llm(prompt: str, provider: str, model: str) -> str:
-    if provider == "anthropic":
-        import anthropic
-        r = anthropic.Anthropic().messages.create(
-            model=model, max_tokens=4000,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return r.content[0].text
-    if provider == "openai":
-        import openai
-        r = openai.OpenAI().chat.completions.create(
-            model=model, max_tokens=4000,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return r.choices[0].message.content
-    raise ValueError(provider)
+    from .llm import call
+    return call(provider, prompt, model=model, max_tokens=4000)
 
 
 def synthesize(feats: StyleFeatures, msgs: list[Message], provider="anthropic",

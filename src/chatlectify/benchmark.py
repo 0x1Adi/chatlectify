@@ -58,19 +58,8 @@ def _m(t, i):
 
 
 def _call(system: str, user: str, provider: str, model: str) -> str:
-    if provider == "anthropic":
-        import anthropic
-        r = anthropic.Anthropic().messages.create(
-            model=model, max_tokens=150, system=system,
-            messages=[{"role": "user", "content": user}])
-        return r.content[0].text
-    if provider == "openai":
-        import openai
-        r = openai.OpenAI().chat.completions.create(
-            model=model, max_tokens=150, temperature=0.7,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}])
-        return r.choices[0].message.content
-    raise ValueError(provider)
+    from .llm import call
+    return call(provider, user, system=system, model=model, max_tokens=150)
 
 
 def run_benchmark(skill_body: str, msgs: list[Message], provider="anthropic",

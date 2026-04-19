@@ -2,5 +2,24 @@
 __pycache__/
 *.egg-info/
 .pytest_cache/
-out/
 .claude/
+
+# user-generated outputs (don't commit your personal chat data or skills)
+out/
+skill/
+skills/
+normalized.json
+features.json
+*.export.json
+my_*.json
+my_*/
+/data/
+/exports/
+SKILL.md
+system_prompt.txt
+style_metrics.json
+gate_report.json
+benchmark_report.json
+exemplars.json
+pastes.json
+pipeline_report.json
